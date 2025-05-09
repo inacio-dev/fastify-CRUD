@@ -1,4 +1,5 @@
 import path from 'path'
+
 import { Options, PostgreSqlDriver } from '@mikro-orm/postgresql'
 
 import { env } from './src/core/env'

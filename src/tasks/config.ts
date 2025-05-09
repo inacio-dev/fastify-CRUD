@@ -1,21 +1,19 @@
-/* eslint-disable @typescript-eslint/no-explicit-any */
-
 import QueueFactory, { Job } from 'bull'
 import { FastifyInstance } from 'fastify'
 
-import * as testTask from './test'
+import * as testerTask from './tester'
 
-export type QueueInstance = InstanceType<typeof QueueFactory>
+type QueueInstance = InstanceType<typeof QueueFactory>
 
-export interface TaskModule {
+interface TaskModule {
   process?: (job: Job, fastify: FastifyInstance) => Promise<unknown>
   onCompleted?: (job: Job, result: unknown) => void
   onFailed?: (job: Job, err: Error) => void
 }
-export type QueueRegistry = Record<string, any>
+export type QueueRegistry = Record<string, QueueInstance>
 
-export const taskModules: Record<string, any> = {
-  test: testTask,
+export const taskModules: Record<string, TaskModule> = {
+  tester: testerTask,
 }
 
 export function onCompleted(job: Job) {

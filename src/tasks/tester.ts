@@ -1,4 +1,3 @@
-// src/tasks/test.ts
 import { Job } from 'bull'
 
 import { logger } from '../core/logger'

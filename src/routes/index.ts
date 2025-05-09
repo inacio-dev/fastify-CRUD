@@ -1,11 +1,11 @@
 import { FastifyInstance } from 'fastify'
 
 import { logger } from '../core/logger'
-import { HealthCheckPayload } from '../tasks/test'
+import { HealthCheckPayload } from '../tasks/tester'
 
 export default async function (fastify: FastifyInstance) {
   fastify.get(
-    '',
+    '/',
     {
       schema: {
         description: 'Verifica o status de saúde da aplicação',
@@ -47,14 +47,14 @@ export default async function (fastify: FastifyInstance) {
           healthcheck.database = isConnected ? 'connected' : 'disconnected'
         }
 
-        await fastify.queues.test.add(healthcheck)
+        await fastify.queues.tester.add(healthcheck)
         return healthcheck
       } catch (error) {
         logger.error({ err: error }, 'Erro ao verificar conexão com o banco de dados')
 
         healthcheck.status = 'ERROR'
         healthcheck.database = 'error'
-        await fastify.queues.test.add(healthcheck)
+        await fastify.queues.tester.add(healthcheck)
         return reply.status(503).send(healthcheck)
       }
     },
