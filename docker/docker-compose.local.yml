@@ -1,0 +1,24 @@
+services:
+  protheus-postgresql:
+    container_name: protheus-postgresql
+    image: postgres:alpine
+    ports:
+      - '5432:5432'
+    env_file:
+      - ../.env
+    healthcheck:
+      test: ['CMD-SHELL', 'pg_isready -U postgres']
+      interval: 10s
+      timeout: 5s
+      retries: 3
+
+  protheus-redis:
+    container_name: protheus-redis
+    image: redis:alpine
+    ports:
+      - '6379:6379'
+    healthcheck:
+      test: ['CMD', 'redis-cli', 'ping']
+      interval: 10s
+      timeout: 5s
+      retries: 3
