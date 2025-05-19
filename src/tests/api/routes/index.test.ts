@@ -1,14 +1,15 @@
-/* eslint-disable @typescript-eslint/no-explicit-any */
-
 import Fastify, { FastifyInstance } from 'fastify'
 import fastifyPlugin from 'fastify-plugin'
 
-import healthCheckRoutes from './index'
+import healthCheckRoutes from '../../../api/routes/index'
 
 // Mock para o logger
-jest.mock('../core/logger', () => ({
+jest.mock('../../../core/logger', () => ({
   logger: {
     error: jest.fn(),
+    info: jest.fn(),
+    warn: jest.fn(),
+    debug: jest.fn(),
   },
 }))
 

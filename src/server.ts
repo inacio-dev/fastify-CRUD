@@ -6,8 +6,9 @@ import fastifySwagger from '@fastify/swagger'
 import fastifySwaggerUi from '@fastify/swagger-ui'
 import fastify from 'fastify'
 
-import { env } from './core/env'
+import pkg from '../package.json'
 import { logger } from './core/logger'
+import { environments } from './environments/environments'
 
 const app = fastify({
   loggerInstance: logger,
@@ -21,7 +22,7 @@ app.register(fastifySwagger, {
       description: 'Documentação da API',
       version: '1.0.0',
     },
-    host: `localhost:${env.PORT}`,
+    host: `localhost:${environments.PORT}`,
     schemes: ['http'],
     consumes: ['application/json'],
     produces: ['application/json'],
@@ -37,7 +38,7 @@ app.register(fastifySwaggerUi, {
 })
 
 app.register(fastifyCors, {
-  origin: env.CORS_ORIGINS,
+  origin: environments.CORS_ORIGINS,
   methods: ['GET', 'POST', 'PUT', 'DELETE', 'PATCH', 'OPTIONS'],
   credentials: true,
   maxAge: 86400,
@@ -49,7 +50,7 @@ app.register(fastifyAutoload, {
 })
 
 app.register(fastifyAutoload, {
-  dir: path.join(__dirname, 'routes'),
+  dir: path.join(__dirname, 'api/routes'),
   options: { prefix: '/api' },
   dirNameRoutePrefix: true,
 })
@@ -57,7 +58,7 @@ app.register(fastifyAutoload, {
 app.get('/', async () => {
   return {
     status: 'online',
-    version: '1.0.0',
+    version: pkg.version,
     timestamp: new Date().toISOString(),
     endpoints: {
       documentation: '/docs',
@@ -69,7 +70,7 @@ app.get('/', async () => {
 const start = async () => {
   try {
     const address = await app.listen({
-      port: env.PORT,
+      port: environments.PORT,
       host: '0.0.0.0',
     })
     logger.info(`Servidor iniciado em ${address}`)

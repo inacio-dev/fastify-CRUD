@@ -1,6 +1,6 @@
 services:
-  protheus-postgresql:
-    container_name: protheus-postgresql
+  postgresql:
+    container_name: postgresql
     image: postgres:alpine
     ports:
       - '5432:5432'
@@ -12,8 +12,8 @@ services:
       timeout: 5s
       retries: 3
 
-  protheus-redis:
-    container_name: protheus-redis
+  redis:
+    container_name: redis
     image: redis:alpine
     ports:
       - '6379:6379'

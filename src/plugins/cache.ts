@@ -3,7 +3,7 @@ import redis from '@fastify/redis'
 import { FastifyInstance, FastifyPluginAsync } from 'fastify'
 import fp from 'fastify-plugin'
 
-import { env } from '../core/env'
+import { environments } from '../environments/environments'
 
 type CacheableValue =
   | string
@@ -28,9 +28,9 @@ declare module 'fastify' {
 const cachePlugin: FastifyPluginAsync = async (fastify: FastifyInstance) => {
   // Configurar Redis
   await fastify.register(redis, {
-    host: env.REDIS_HOST,
-    port: env.REDIS_PORT,
-    password: env.REDIS_PASSWORD,
+    host: environments.REDIS_HOST,
+    port: environments.REDIS_PORT,
+    password: environments.REDIS_PASSWORD,
     family: 4, // IPv4
   })
 

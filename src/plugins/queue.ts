@@ -1,9 +1,17 @@
-import QueueFactory from 'bull'
+import QueueFactory, { JobOptions } from 'bull'
 import { FastifyPluginAsync } from 'fastify'
 import fp from 'fastify-plugin'
 
-import { env } from '../core/env'
-import { QueueRegistry, taskModules } from '../tasks/config'
+import { logger } from '../core/logger'
+import { environments } from '../environments/environments'
+import {
+  QueueRegistry,
+  ScheduleConfig,
+  ScheduleCronConfig,
+  ScheduleEveryConfig,
+  taskModules,
+} from '../infrastructure/queue/registry'
+import { convertEveryToMs } from '../utils/convert-every-to-ms'
 
 declare module 'fastify' {
   interface FastifyInstance {
@@ -11,35 +19,106 @@ declare module 'fastify' {
   }
 }
 
+function isEverySchedule(schedule: ScheduleConfig): schedule is ScheduleEveryConfig {
+  return (
+    'every' in schedule &&
+    (typeof schedule.every === 'number' || typeof schedule.every === 'string')
+  )
+}
+
+function isCronSchedule(schedule: ScheduleConfig): schedule is ScheduleCronConfig {
+  return 'cron' in schedule && typeof schedule.cron === 'string'
+}
+
+async function removeEveryJob(queue: QueueFactory.Queue): Promise<void> {
+  try {
+    const repeatableJobs = await queue.getRepeatableJobs()
+
+    for (const job of repeatableJobs) {
+      await queue.removeRepeatableByKey(job.key)
+    }
+  } catch (error) {
+    logger.error(`Erro ao remover jobs.`, error)
+  }
+}
+
+// Função auxiliar para configurar um agendamento
+async function configureSchedule(
+  queue: QueueFactory.Queue,
+  queueName: string,
+  scheduleConfig: ScheduleConfig,
+): Promise<void> {
+  try {
+    if (isCronSchedule(scheduleConfig)) {
+      const jobOptions: JobOptions = {
+        repeat: {
+          cron: scheduleConfig.cron,
+        },
+        jobId: scheduleConfig.name || undefined,
+      }
+
+      await queue.add(scheduleConfig.jobData || {}, jobOptions)
+
+      logger.info(
+        `Tarefa ${scheduleConfig.name ? `'${scheduleConfig.name}' ` : ''}agendada para ${queueName}: ${scheduleConfig.cron}`,
+      )
+    } else if (isEverySchedule(scheduleConfig)) {
+      const jobOptions: JobOptions = {
+        repeat: {
+          every: convertEveryToMs(scheduleConfig.every),
+        },
+        jobId: scheduleConfig.name || undefined,
+      }
+
+      await queue.add(scheduleConfig.jobData || {}, jobOptions)
+
+      logger.info(
+        `Tarefa ${scheduleConfig.name ? `'${scheduleConfig.name}' ` : ''}agendada para ${queueName}: ${scheduleConfig.every}`,
+      )
+    }
+  } catch (err: unknown) {
+    const errorMessage = err instanceof Error ? err.message : String(err)
+    logger.error(
+      `Erro ao configurar agendamento para ${queueName}${scheduleConfig.name ? ` (${scheduleConfig.name})` : ''}: ${errorMessage}`,
+    )
+  }
+}
+
 const queuePlugin: FastifyPluginAsync = async (fastify) => {
   const queues: QueueRegistry = {}
   const redisConfig = {
-    host: env.REDIS_HOST,
-    port: env.REDIS_PORT,
-    password: env.REDIS_PASSWORD,
+    host: environments.REDIS_HOST,
+    port: environments.REDIS_PORT,
+    password: environments.REDIS_PASSWORD,
   }
 
   for (const [queueName, mod] of Object.entries(taskModules)) {
-    const { process: processFn, onCompleted: onCompletedFn, onFailed: onFailedFn } = mod
-
-    if (!processFn && !onCompletedFn && !onFailedFn) {
-      fastify.log.warn(`Nenhum handler para fila "${queueName}", pulando.`)
-      continue
-    }
+    const { process: processFn, schedule } = mod
 
     const queue = new QueueFactory(queueName, { redis: redisConfig })
 
+    await removeEveryJob(queue)
+
     if (processFn) {
       queue.process(async (job) => {
-        fastify.log.info(`Processando ${queueName}: ${JSON.stringify(job.data)}`)
+        logger.info(`Processando ${queueName}: ${JSON.stringify(job.data)}`)
         return processFn(job, fastify)
       })
     }
-    if (onCompletedFn) queue.on('completed', onCompletedFn)
-    if (onFailedFn) queue.on('failed', onFailedFn)
+
+    // Configuração para tarefas agendadas
+    if (schedule) {
+      // Converter para array para tratar uniformemente
+      const schedules = Array.isArray(schedule) ? schedule : [schedule]
+
+      // Configurar cada agendamento
+      for (const scheduleConfig of schedules) {
+        await configureSchedule(queue, queueName, scheduleConfig)
+      }
+    }
 
     queues[queueName] = queue
-    fastify.log.info(`Fila registrada: ${queueName}`)
+    logger.info(`Fila registrada: ${queueName}`)
   }
 
   fastify.decorate('queues', queues)

@@ -14,7 +14,7 @@
     "incremental": true,
     "experimentalDecorators": true,
     "rootDir": ".",
-    "outDir": "./build",
+    "outDir": "./dist",
     "emitDecoratorMetadata": true
   },
   "include": ["**/*.ts", "**/*.tsx"],

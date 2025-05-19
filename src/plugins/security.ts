@@ -4,7 +4,7 @@ import helmet from '@fastify/helmet'
 import { FastifyPluginAsync } from 'fastify'
 import fp from 'fastify-plugin'
 
-import { env } from '../core/env'
+import { environments } from '../environments/environments'
 
 const securityPlugin: FastifyPluginAsync = async (fastify) => {
   // Configurações de segurança de cabeçalhos HTTP
@@ -14,7 +14,7 @@ const securityPlugin: FastifyPluginAsync = async (fastify) => {
 
   // Suporte para cookies
   await fastify.register(cookie, {
-    secret: env.COOKIE_SECRET, // para cookies assinados
+    secret: environments.COOKIE_SECRET, // para cookies assinados
     parseOptions: {}, // opções para cookie parsing
   })
 

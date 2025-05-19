@@ -2,7 +2,7 @@ import path from 'path'
 
 import { Options, PostgreSqlDriver } from '@mikro-orm/postgresql'
 
-import { env } from './src/core/env'
+import { environments } from './src/environments/environments'
 
 const mikroOrmConfig: Options = {
   /* ---------------------------------------------------------------------------
@@ -16,20 +16,20 @@ const mikroOrmConfig: Options = {
       - Define o uso de transações implícitas
   */
   driver: PostgreSqlDriver,
-  entities: ['./build/**/*.entity.js'],
+  entities: ['./dist/**/*.entity.js'],
   entitiesTs: ['./src/**/*.entity.ts'],
-  debug: env.NODE_ENV === 'development',
+  debug: environments.NODE_ENV === 'development',
   metadataCache: { enabled: true },
   timezone: 'UTC',
   implicitTransactions: true,
   // ---------------------------------------------------------------------------
   // Configurações básicas de conexão ------------------------------------------
-  port: env.POSTGRES_PORT,
-  user: env.POSTGRES_USER,
-  host: env.POSTGRES_HOST,
-  dbName: env.POSTGRES_DB,
-  password: env.POSTGRES_PASSWORD,
-  schema: env.POSTGRES_SCHEMA,
+  port: environments.POSTGRES_PORT,
+  user: environments.POSTGRES_USER,
+  host: environments.POSTGRES_HOST,
+  dbName: environments.POSTGRES_DB,
+  password: environments.POSTGRES_PASSWORD,
+  schema: environments.POSTGRES_SCHEMA,
   // ---------------------------------------------------------------------------
   // Configuração de migrations ------------------------------------------------
   migrations: {
@@ -64,7 +64,7 @@ const mikroOrmConfig: Options = {
   // Configurações de segurança ------------------------------------------------
   driverOptions: {
     connection: {
-      ssl: env.POSTGRES_SSL
+      ssl: environments.POSTGRES_SSL
         ? {
             rejectUnauthorized: false,
           }

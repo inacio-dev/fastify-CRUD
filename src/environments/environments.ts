@@ -2,7 +2,7 @@ import 'dotenv/config'
 
 import { z } from 'zod'
 
-const EnvSchema = z.object({
+const EnvironmentsSchema = z.object({
   NODE_ENV: z
     .enum(['development', 'production'], {
       message: '[.env - NODE_ENV] Valor desconhecido',
@@ -71,6 +71,6 @@ const EnvSchema = z.object({
   // ---------------------------------------------------------------------------
 })
 
-type Env = z.infer<typeof EnvSchema>
+type Env = z.infer<typeof EnvironmentsSchema>
 
-export const env: Env = EnvSchema.parse(process.env)
+export const environments: Env = EnvironmentsSchema.parse(process.env)

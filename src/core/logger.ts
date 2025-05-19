@@ -5,7 +5,7 @@ import pino from 'pino'
 import pretty from 'pino-pretty'
 import { createStream } from 'rotating-file-stream'
 
-import { env } from './env'
+import { environments } from '../environments/environments'
 
 const logDir = path.join(process.cwd(), 'logs')
 if (!fs.existsSync(logDir)) {
@@ -13,7 +13,7 @@ if (!fs.existsSync(logDir)) {
 }
 
 const loggerOptions = {
-  level: env.DEBUG ? 'debug' : 'info',
+  level: environments.DEBUG ? 'debug' : 'info',
   formatters: {
     level: (label: string) => {
       return { level: label.toUpperCase() }

@@ -1,6 +1,6 @@
 services:
-  protheus-api:
-    container_name: protheus-api
+  api:
+    container_name: api
     build:
       context: ..
       dockerfile: docker/Dockerfile
@@ -14,6 +14,3 @@ services:
       interval: 15s
       timeout: 10s
       retries: 3
-    depends_on:
-      protheus-postgresql:
-        condition: service_healthy

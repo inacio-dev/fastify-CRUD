@@ -63,8 +63,8 @@ pnpm schema:update
 ## Scripts npm
 
 - `pnpm dev`: Inicia o servidor em modo desenvolvimento com hot reload
-- `pnpm build`: Compila o projeto TypeScript para `build/`
-- `pnpm start`: Inicia o servidor compilado em `build/server.js`
+- `pnpm build`: Compila o projeto TypeScript para `dist/`
+- `pnpm start`: Inicia o servidor compilado em `dist/server.js`
 - `pnpm lint`: Executa ESLint em todo o código
 - `pnpm migration:create <nome>`: Cria uma nova migration do MikroORM
 - `pnpm migration:up`: Aplica todas as migrations pendentes
@@ -247,3 +247,37 @@ Pull requests são bem-vindos! Para alterações maiores, abra uma issue antes p
 ---
 
 Desenvolvido por [inacio-dev](https://github.com/inacio-dev).
+
+### Estrutura de pastas
+
+📁 src/
+├── 📁 types/                    # Definições de tipos globais
+├── 📁 config/                   # Configurações da aplicação
+├── 📁 constants/                # Constantes e enumerações
+├── 📁 environments/             # Configurações de ambiente (dev, prod, test)
+├── 📁 core/                     # Núcleo da aplicação e funcionalidades fundamentais
+├── 📁 plugins/                  # Plugins do Fastify
+├── 📁 infrastructure/           # Código de infraestrutura e integrações
+│   ├── 📁 database/             # Configuração e conexões com banco de dados
+│   └── 📁 queue/                # Serviços de fila e mensageria
+├── 📁 lib/                      # Bibliotecas internas e utilitários específicos
+├── 📁 utils/                    # Funções utilitárias genéricas
+├── 📁 domain/                   # Lógica de domínio da aplicação
+│   ├── 📁 entities/             # Entidades do domínio
+│   ├── 📁 models/               # Modelos de dados
+│   ├── 📁 services/             # Serviços de domínio
+│   └── 📁 repositories/         # Interfaces de repositórios
+├── 📁 use-cases/                # Casos de uso da aplicação
+├── 📁 schemas/                  # Esquemas de validação
+├── 📁 api/                      # Código relacionado à API
+│   ├── 📁 controllers/          # Controladores da API
+│   ├── 📁 routes/               # Definições de rotas
+│   ├── 📁 middlewares/          # Middlewares
+│   └── 📁 validators/           # Validadores de entrada
+├── 📁 events/                   # Definições de eventos
+│   ├── 📁 listeners/            # Ouvintes de eventos
+│   └── 📁 subscribers/          # Assinantes de eventos
+├── 📁 factories/                # Fábricas para criação de objetos
+├── 📁 helpers/                  # Funções auxiliares específicas do contexto
+└── 📁 tests/                    # Testes
+    └── 📁 mocks/                # Dados fictícios para testes

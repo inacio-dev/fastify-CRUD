@@ -1,7 +1,7 @@
 import { FastifyInstance } from 'fastify'
 
-import { logger } from '../core/logger'
-import { HealthCheckPayload } from '../tasks/tester'
+import { logger } from '../../core/logger'
+import { HealthCheckPayload } from '../../types/tester'
 
 export default async function (fastify: FastifyInstance) {
   fastify.get(
