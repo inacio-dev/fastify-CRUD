@@ -10,7 +10,7 @@
     "build": "tsc -p tsconfig.json",
     "start": "node dist/src/server.js",
     "lint": "eslint .",
-    "test": "jest",
+    "test": "jest --verbose",
     "migration:create": "mikro-orm migration:create",
     "migration:up": "mikro-orm migration:up",
     "migration:down": "mikro-orm migration:down",
