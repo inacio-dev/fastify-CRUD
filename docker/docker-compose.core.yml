@@ -1,0 +1,93 @@
+# =========================================
+# Docker Compose para Desenvolvimento
+# =========================================
+# Serviços incluídos:
+# - Redis (cache distribuído)
+# - ClamAV (antivírus para uploads)
+# - PostgreSQL (banco relacional)
+# - Couchbase (banco NoSQL)
+
+services:
+  # =========================================
+  # Redis - Cache Distribuído
+  # =========================================
+  redis:
+    container_name: redis-dev
+    image: redis:8-alpine
+    ports:
+      - "6379:6379"
+    command: redis-server --appendonly yes
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    networks:
+      - fastify-network
+
+  # =========================================
+  # ClamAV - Antivírus para uploads
+  # =========================================
+  clamav:
+    container_name: clamav-dev
+    image: clamav/clamav:latest
+    ports:
+      - "3310:3310"
+    environment:
+      - CLAMAV_NO_FRESHCLAMD=false
+    healthcheck:
+      test: ["CMD", "/usr/local/bin/clamdcheck.sh"]
+      interval: 60s
+      timeout: 30s
+      retries: 3
+      start_period: 120s # ClamAV demora ~2min para baixar definições
+    networks:
+      - fastify-network
+
+  # =========================================
+  # PostgreSQL - Banco Relacional
+  # =========================================
+  postgres:
+    container_name: postgres-dev
+    image: postgres:18-alpine
+    ports:
+      - "5432:5432"
+    env_file:
+      - ../.env
+    environment:
+      - POSTGRES_INITDB_ARGS=--encoding=UTF-8 --lc-collate=pt_BR.UTF-8 --lc-ctype=pt_BR.UTF-8
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U fastify -d fastify_db"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    networks:
+      - fastify-network
+
+  # =========================================
+  # Couchbase - Banco NoSQL
+  # =========================================
+  couchbase:
+    container_name: couchbase-dev
+    image: couchbase:community-8.0.0
+    ports:
+      - "8091-8096:8091-8096" # Web console e APIs
+      - "11210:11210" # Cliente
+    environment:
+      - COUCHBASE_ADMINISTRATOR_USERNAME=Administrator
+      - COUCHBASE_ADMINISTRATOR_PASSWORD=password
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8091/pools"]
+      interval: 30s
+      timeout: 10s
+      retries: 5
+      start_period: 60s
+    networks:
+      - fastify-network
+
+# =========================================
+# Rede Interna
+# =========================================
+networks:
+  fastify-network:
+    driver: bridge

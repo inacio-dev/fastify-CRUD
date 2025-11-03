@@ -1,0 +1,50 @@
+# =========================================
+# Docker Compose - Backend
+# =========================================
+# Este arquivo roda APENAS o backend.
+#
+# IMPORTANTE: Os servicos de suporte (PostgreSQL, Redis, ClamAV, Couchbase)
+# devem estar rodando via docker-compose.core.yml antes de iniciar o backend.
+#
+# Uso:
+#
+# 1. Suba os serviços de suporte primeiro:
+#    docker compose -f docker/docker-compose.core.yml up -d
+#
+# 2. Depois suba o backend em modo produção:
+#    docker compose -f docker/docker-compose.prod.yml up -d
+
+services:
+  backend:
+    container_name: backend
+    build:
+      context: ..
+      dockerfile: docker/Dockerfile
+      target: production
+    ports:
+      - "3333:3333"
+    volumes:
+      - ../uploads:/app/uploads
+      - ../logs:/app/logs
+    env_file:
+      - ../.env
+    environment:
+      - NODE_ENV=production
+      # Override para aceitar conexões de fora do container
+      - HOST=0.0.0.0
+      # Override hosts para usar nomes dos serviços Docker (não localhost)
+      - POSTGRES_HOST=postgres
+      - REDIS_HOST=redis
+      - CLAMAV_HOST=clamav
+      - COUCHBASE_URL=couchbase://couchbase
+    networks:
+      - fastify-network
+    restart: always
+
+# =========================================
+# Rede Interna (Externa - criada pelo prod.yml)
+# =========================================
+networks:
+  fastify-network:
+    external: true
+    name: docker_fastify-network
